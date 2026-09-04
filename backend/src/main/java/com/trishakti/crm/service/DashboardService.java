@@ -3,6 +3,7 @@ package com.trishakti.crm.service;
 import com.trishakti.crm.domain.enums.BookingStatus;
 import com.trishakti.crm.domain.enums.LeadStatus;
 import com.trishakti.crm.domain.enums.PurchaseStatus;
+import com.trishakti.crm.domain.enums.RoleName;
 import com.trishakti.crm.domain.enums.SiteVisitStatus;
 import com.trishakti.crm.dto.DashboardDtos.CallingPerformanceRow;
 import com.trishakti.crm.dto.DashboardDtos.DashboardSummary;
@@ -94,7 +95,8 @@ public class DashboardService {
                 .sorted((a, b) -> Long.compare(b.totalLeads(), a.totalLeads()))
                 .toList();
 
-        List<CallingPerformanceRow> callingTeam = callLogRepository.callerPerformance(start, end).stream()
+        List<CallingPerformanceRow> callingTeam = callLogRepository
+                .callerPerformance(RoleName.CALLING_TEAM, start, end).stream()
                 .map(r -> new CallingPerformanceRow(
                         r.getUserId(), r.getName(), r.getTotalCalls(), r.getConnected(),
                         r.getInterested(), r.getSiteVisits(),
@@ -102,7 +104,8 @@ public class DashboardService {
                 .sorted((a, b) -> Long.compare(b.totalCalls(), a.totalCalls()))
                 .toList();
 
-        List<SalesPerformanceRow> salesTeam = leadRepository.userPerformance(INTERESTED_STATES).stream()
+        List<SalesPerformanceRow> salesTeam = leadRepository
+                .userPerformance(RoleName.SALES_EXECUTIVE, INTERESTED_STATES).stream()
                 .map(r -> new SalesPerformanceRow(
                         r.getUserId(), r.getName(), r.getTotal(), r.getInterested(), r.getPurchased(),
                         r.getTotal() == 0 ? 0.0 : round(r.getPurchased() * 100.0 / r.getTotal())))

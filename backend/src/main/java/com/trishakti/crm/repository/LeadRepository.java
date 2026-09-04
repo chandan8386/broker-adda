@@ -2,6 +2,7 @@ package com.trishakti.crm.repository;
 
 import com.trishakti.crm.domain.Lead;
 import com.trishakti.crm.domain.enums.LeadStatus;
+import com.trishakti.crm.domain.enums.RoleName;
 import com.trishakti.crm.domain.enums.SourceChannel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -65,16 +66,28 @@ public interface LeadRepository extends JpaRepository<Lead, Long>, JpaSpecificat
             """)
     List<SourcePerformance> sourcePerformance();
 
+    /**
+     * Lead stats per user holding {@code role}.
+     *
+     * <p>Driven from User rather than Lead so that (a) only the requested role appears — grouping
+     * by Lead.assignedUser mixed calling-team members into the sales report — and (b) users with
+     * no leads still show up with zeros instead of vanishing, which is exactly what a performance
+     * report needs to surface. The lead predicates sit in the ON clause; moving {@code deleted}
+     * into WHERE would silently turn the LEFT JOIN back into an inner join.
+     */
     @Query("""
-            select l.assignedUser.id as userId, l.assignedUser.fullName as name,
-                   count(l) as total,
-                   sum(case when l.status in :interested then 1 else 0 end) as interested,
-                   sum(case when l.status = com.trishakti.crm.domain.enums.LeadStatus.PURCHASED then 1 else 0 end) as purchased
-            from Lead l
-            where l.deleted = false and l.assignedUser is not null
-            group by l.assignedUser.id, l.assignedUser.fullName
+            select u.id as userId, u.fullName as name,
+                   count(l.id) as total,
+                   coalesce(sum(case when l.status in :interested then 1 else 0 end), 0) as interested,
+                   coalesce(sum(case when l.status = com.trishakti.crm.domain.enums.LeadStatus.PURCHASED then 1 else 0 end), 0) as purchased
+            from User u
+              join u.roles r
+              left join Lead l on l.assignedUser = u and l.deleted = false
+            where r.name = :role and u.active = true
+            group by u.id, u.fullName
             """)
-    List<UserLeadPerformance> userPerformance(@Param("interested") List<LeadStatus> interested);
+    List<UserLeadPerformance> userPerformance(@Param("role") RoleName role,
+                                              @Param("interested") List<LeadStatus> interested);
 
     @Query("""
             select l from Lead l
