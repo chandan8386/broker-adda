@@ -1,0 +1,6 @@
+{
+  "name":"trishakti-crm-desktop","version":"1.0.0","private":true,"main":"main.cjs",
+  "scripts":{"start":"electron .","build:web":"npm --prefix ../web run build","dist":"npm run build:web && electron-builder --win nsis"},
+  "devDependencies":{"electron":"latest","electron-builder":"latest"},
+  "build":{"appId":"com.trishakti.crm","productName":"Trishakti CRM","directories":{"output":"dist"},"files":["main.cjs","preload.cjs","../web/dist/**/*"],"win":{"target":"nsis","icon":"build/icon.ico"}}
+}

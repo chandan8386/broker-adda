@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    # MODE=PostgreSQL only. Do NOT add DATABASE_TO_LOWER: it is fixed at database
+    # creation time, so adding it later makes H2 fail to reopen an existing file.
+    url: jdbc:h2:file:./data/trishakti;MODE=PostgreSQL;AUTO_SERVER=TRUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.H2Dialect
+  sql:
+    init:
+      mode: never
+
+app:
+  seed:
+    enabled: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api

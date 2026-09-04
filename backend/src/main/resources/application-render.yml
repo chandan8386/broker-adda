@@ -1,0 +1,16 @@
+# Profile used when deploying the API to Render (SPRING_PROFILES_ACTIVE=render).
+# Render's managed PostgreSQL exposes its connection details as separate values;
+# render.yaml injects them as DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD and they
+# are composed into a JDBC URL here. Everything else is inherited from application.yml.
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX:5}
+      minimum-idle: 1
+
+# Render terminates TLS at its proxy; trust X-Forwarded-* so scheme/host are correct.
+server:
+  forward-headers-strategy: framework

@@ -1,0 +1,118 @@
+package com.trishakti.crm.domain;
+
+import jakarta.persistence.Entity;
+import org.hibernate.boot.Metadata;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.StandardServiceRegistry;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.dialect.PostgreSQLDialect;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+/**
+ * Generates the schema for the real PostgreSQL dialect straight from the entity mappings
+ * (no database connection needed) and asserts it is sane. This catches PostgreSQL-specific
+ * mapping mistakes — reserved table names, {@code @Lob} columns silently becoming large-object
+ * OIDs, unsupported column definitions — that H2's PostgreSQL compatibility mode would hide.
+ */
+class PostgresSchemaGenerationTest {
+
+    private static final String ENTITY_PACKAGE = "com.trishakti.crm.domain";
+    private static String ddl;
+
+    @BeforeAll
+    static void generateDdl() throws IOException {
+        // Written to target/ so it can be diffed against docs/schema.sql when mappings change.
+        Path out = Path.of("target", "generated-schema", "postgres-schema.sql");
+        Files.createDirectories(out.getParent());
+        Files.deleteIfExists(out);
+
+        StandardServiceRegistry registry = new StandardServiceRegistryBuilder()
+                .applySetting(AvailableSettings.DIALECT, PostgreSQLDialect.class.getName())
+                // No JDBC connection is available; stop Hibernate probing the database for metadata.
+                .applySetting("hibernate.boot.allow_jdbc_metadata_access", "false")
+                .applySetting(AvailableSettings.HBM2DDL_AUTO, "none")
+                // JPA-standard script generation: writes CREATE DDL, never touches a database.
+                .applySetting("jakarta.persistence.schema-generation.scripts.action", "create")
+                .applySetting("jakarta.persistence.schema-generation.scripts.create-target", out.toString())
+                .build();
+
+        MetadataSources sources = new MetadataSources(registry);
+        for (Class<?> entity : entityClasses()) {
+            sources.addAnnotatedClass(entity);
+        }
+        Metadata metadata = sources.buildMetadata();
+
+        try (SessionFactory ignored = metadata.buildSessionFactory()) {
+            ddl = Files.readString(out, StandardCharsets.UTF_8).toLowerCase();
+        }
+        assertThat(ddl).as("generated PostgreSQL DDL").isNotBlank();
+    }
+
+    private static List<Class<?>> entityClasses() {
+        var scanner = new ClassPathScanningCandidateComponentProvider(false);
+        scanner.addIncludeFilter(new AnnotationTypeFilter(Entity.class));
+        List<Class<?>> classes = new ArrayList<>();
+        for (BeanDefinition definition : scanner.findCandidateComponents(ENTITY_PACKAGE)) {
+            try {
+                classes.add(Class.forName(definition.getBeanClassName()));
+            } catch (ClassNotFoundException e) {
+                throw new IllegalStateException(e);
+            }
+        }
+        return classes;
+    }
+
+    @Test
+    void everyEntityProducesACreateTableStatement() {
+        assertThat(entityClasses()).hasSizeGreaterThanOrEqualTo(19);
+        Set<String> expected = Set.of(
+                "role", "team", "users", "user_role", "refresh_token",
+                "property_project", "property", "customer", "leads",
+                "lead_assignment", "lead_activity", "call_log", "follow_up",
+                "site_visit", "booking", "purchase", "payment", "task",
+                "notification", "audit_log");
+        for (String table : expected) {
+            assertThat(ddl).as("create table %s", table).contains("create table " + table + " (");
+        }
+    }
+
+    @Test
+    void reservedWordsAreAvoidedInTableNames() {
+        // USER is reserved in PostgreSQL; LEAD is a reserved window function name.
+        assertThat(ddl).doesNotContain("create table user (");
+        assertThat(ddl).doesNotContain("create table lead (");
+    }
+
+    @Test
+    void jsonAuditColumnsAreTextNotLargeObjectOids() {
+        assertThat(ddl).contains("before_json text");
+        assertThat(ddl).contains("after_json text");
+        assertThat(ddl).doesNotContain(" oid");
+    }
+
+    @Test
+    void booleansAndIdentityColumnsUsePostgresTypes() {
+        assertThat(ddl).contains("boolean not null");
+        assertThat(ddl).contains("generated by default as identity");
+        // MySQL-only artefacts must not leak into the generated DDL
+        assertThat(ddl).doesNotContain("auto_increment");
+        assertThat(ddl).doesNotContain("engine=innodb");
+        assertThat(ddl).doesNotContain("datetime(6)");
+    }
+}

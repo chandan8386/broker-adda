@@ -1,0 +1,352 @@
+{
+  "info": {
+    "name": "Shri Trishakti Infra Realtors — Property CRM API",
+    "_postman_id": "b1a7f5c2-7d3e-4a2b-9c11-trishakticrm001",
+    "description": "REST API for the Property Lead Management / CRM. Import, set the {{baseUrl}} variable, run 'Auth > Login' (or 'Register First Admin') and the access token is stored automatically.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "leadId", "value": "1" },
+    { "key": "siteVisitId", "value": "1" },
+    { "key": "bookingId", "value": "1" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register First Admin",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/register-first-admin",
+            "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"System Administrator\",\n  \"username\": \"admin\",\n  \"email\": \"admin@trishakti.com\",\n  \"password\": \"Password@123\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "const b = pm.response.json();",
+            "if (b.accessToken) { pm.collectionVariables.set('accessToken', b.accessToken); pm.collectionVariables.set('refreshToken', b.refreshToken); }"
+          ] } }]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/login",
+            "body": { "mode": "raw", "raw": "{\n  \"usernameOrEmail\": \"admin@trishakti.com\",\n  \"password\": \"Password@123\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "const b = pm.response.json();",
+            "pm.collectionVariables.set('accessToken', b.accessToken);",
+            "pm.collectionVariables.set('refreshToken', b.refreshToken);",
+            "pm.test('has token', () => pm.expect(b.accessToken).to.be.a('string'));"
+          ] } }]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/refresh",
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}" }
+          }
+        },
+        { "name": "Me", "request": { "method": "GET", "url": "{{baseUrl}}/auth/me" } },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/change-password",
+            "body": { "mode": "raw", "raw": "{\n  \"currentPassword\": \"Password@123\",\n  \"newPassword\": \"Password@1234\"\n}" }
+          }
+        },
+        { "name": "Logout", "request": { "method": "POST", "url": "{{baseUrl}}/auth/logout" } }
+      ]
+    },
+    {
+      "name": "Dashboard & Reports",
+      "item": [
+        { "name": "Summary", "request": { "method": "GET", "url": "{{baseUrl}}/dashboard/summary" } },
+        { "name": "Reports", "request": { "method": "GET", "url": "{{baseUrl}}/dashboard/reports" } }
+      ]
+    },
+    {
+      "name": "Leads",
+      "item": [
+        { "name": "List (filter/sort/paginate)", "request": { "method": "GET", "url": {
+          "raw": "{{baseUrl}}/leads?page=0&size=20&sort=createdAt,desc&status=ASSIGNED&q=prospect",
+          "host": ["{{baseUrl}}"], "path": ["leads"],
+          "query": [
+            { "key": "page", "value": "0" }, { "key": "size", "value": "20" },
+            { "key": "sort", "value": "createdAt,desc" },
+            { "key": "status", "value": "ASSIGNED" }, { "key": "q", "value": "prospect" }
+          ] } } },
+        { "name": "Get by id", "request": { "method": "GET", "url": "{{baseUrl}}/leads/{{leadId}}" } },
+        {
+          "name": "Create Lead",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/leads",
+            "body": { "mode": "raw", "raw": "{\n  \"customerName\": \"New Prospect\",\n  \"mobile\": \"9876500011\",\n  \"email\": \"prospect@example.com\",\n  \"source\": \"Facebook Diwali Campaign\",\n  \"sourceChannel\": \"FACEBOOK\",\n  \"propertyType\": \"FLAT\",\n  \"budgetMin\": 4000000,\n  \"budgetMax\": 6000000,\n  \"preferredLocation\": \"Hinjewadi, Pune\",\n  \"priority\": \"HOT\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "if (pm.response.code === 201) pm.collectionVariables.set('leadId', pm.response.json().id);"
+          ] } }]
+        },
+        {
+          "name": "Update Lead",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/leads/{{leadId}}",
+            "body": { "mode": "raw", "raw": "{\n  \"customerName\": \"New Prospect\",\n  \"mobile\": \"9876500011\",\n  \"email\": \"prospect@example.com\",\n  \"propertyType\": \"FLAT\",\n  \"preferredLocation\": \"Baner, Pune\",\n  \"priority\": \"WARM\"\n}" }
+          }
+        },
+        {
+          "name": "Transition (workflow)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/leads/{{leadId}}/transition",
+            "body": { "mode": "raw", "raw": "{\n  \"targetStatus\": \"CALLING\",\n  \"note\": \"Starting outreach\"\n}" }
+          }
+        },
+        { "name": "Activity Timeline", "request": { "method": "GET", "url": "{{baseUrl}}/leads/{{leadId}}/activities" } },
+        { "name": "Assignment History", "request": { "method": "GET", "url": "{{baseUrl}}/leads/{{leadId}}/assignments" } },
+        {
+          "name": "Add Note",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/leads/{{leadId}}/notes",
+            "body": { "mode": "raw", "raw": "{\n  \"note\": \"Customer prefers a weekend site visit.\"\n}" }
+          }
+        },
+        { "name": "Import Template (CSV)", "request": { "method": "GET", "url": "{{baseUrl}}/leads/import/template" } },
+        {
+          "name": "Import Leads (CSV upload)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/leads/import",
+            "body": { "mode": "formdata", "formdata": [{ "key": "file", "type": "file", "src": "/path/to/leads.csv" }] }
+          }
+        },
+        { "name": "Export Leads (CSV)", "request": { "method": "GET", "url": "{{baseUrl}}/leads/export?status=INTERESTED" } }
+      ]
+    },
+    {
+      "name": "Lead Assignment",
+      "item": [
+        {
+          "name": "Assign",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/lead-assignments/assign",
+            "body": { "mode": "raw", "raw": "{\n  \"leadIds\": [{{leadId}}],\n  \"toUserId\": 3,\n  \"reason\": \"Balancing workload\"\n}" }
+          }
+        },
+        {
+          "name": "Auto-assign (round robin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/lead-assignments/auto-assign",
+            "body": { "mode": "raw", "raw": "{\n  \"leadIds\": [1,2,3,4],\n  \"userIds\": [3,4],\n  \"strategy\": \"ROUND_ROBIN\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Calling & Follow-up",
+      "item": [
+        {
+          "name": "Log Call",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/calls",
+            "body": { "mode": "raw", "raw": "{\n  \"leadId\": {{leadId}},\n  \"direction\": \"OUTBOUND\",\n  \"outcome\": \"CONNECTED\",\n  \"disposition\": \"INTERESTED\",\n  \"durationSeconds\": 180,\n  \"notes\": \"Interested in 3BHK, wants a site visit\",\n  \"nextFollowUpAt\": \"2026-09-10T05:30:00Z\"\n}" }
+          }
+        },
+        { "name": "Calls for Lead", "request": { "method": "GET", "url": "{{baseUrl}}/calls/lead/{{leadId}}" } },
+        { "name": "My Calls", "request": { "method": "GET", "url": "{{baseUrl}}/calls/mine" } },
+        {
+          "name": "Schedule Follow-up",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/calls/follow-ups",
+            "body": { "mode": "raw", "raw": "{\n  \"leadId\": {{leadId}},\n  \"dueAt\": \"2026-09-12T04:30:00Z\",\n  \"channel\": \"CALL\",\n  \"notes\": \"Confirm site visit slot\"\n}" }
+          }
+        },
+        { "name": "My Pending Follow-ups", "request": { "method": "GET", "url": "{{baseUrl}}/calls/follow-ups/mine" } }
+      ]
+    },
+    {
+      "name": "Site Visits",
+      "item": [
+        {
+          "name": "Schedule Site Visit",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/site-visits",
+            "body": { "mode": "raw", "raw": "{\n  \"leadId\": {{leadId}},\n  \"propertyId\": 1,\n  \"salesExecutiveId\": 5,\n  \"scheduledAt\": \"2026-09-14T05:30:00Z\",\n  \"pickupRequired\": true\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "if (pm.response.code === 200) pm.collectionVariables.set('siteVisitId', pm.response.json().id);"
+          ] } }]
+        },
+        { "name": "List by status", "request": { "method": "GET", "url": "{{baseUrl}}/site-visits?status=SCHEDULED" } },
+        { "name": "For Lead", "request": { "method": "GET", "url": "{{baseUrl}}/site-visits/lead/{{leadId}}" } },
+        {
+          "name": "Record Result",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/site-visits/{{siteVisitId}}/result",
+            "body": { "mode": "raw", "raw": "{\n  \"result\": \"READY_TO_BOOK\",\n  \"feedback\": \"Loved the unit, ready to negotiate\",\n  \"rating\": 5\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sales / Purchase",
+      "item": [
+        {
+          "name": "Create Booking",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/sales/bookings",
+            "body": { "mode": "raw", "raw": "{\n  \"leadId\": {{leadId}},\n  \"propertyId\": 1,\n  \"quotedPrice\": 18500000,\n  \"negotiatedPrice\": 17900000,\n  \"tokenAmount\": 200000\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": [
+            "if (pm.response.code === 200) pm.collectionVariables.set('bookingId', pm.response.json().id);"
+          ] } }]
+        },
+        { "name": "List Bookings", "request": { "method": "GET", "url": "{{baseUrl}}/sales/bookings" } },
+        {
+          "name": "Update Booking",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/sales/bookings/{{bookingId}}",
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"CONFIRMED\",\n  \"negotiatedPrice\": 17800000\n}" }
+          }
+        },
+        {
+          "name": "Create Purchase",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/sales/purchases",
+            "body": { "mode": "raw", "raw": "{\n  \"bookingId\": {{bookingId}},\n  \"finalPrice\": 17800000,\n  \"saleDeedNumber\": \"SD/2026/00123\",\n  \"agreementDate\": \"2026-09-20\"\n}" }
+          }
+        },
+        {
+          "name": "Record Payment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/sales/payments",
+            "body": { "mode": "raw", "raw": "{\n  \"bookingId\": {{bookingId}},\n  \"type\": \"DOWN_PAYMENT\",\n  \"mode\": \"NEFT\",\n  \"amount\": 3000000,\n  \"paidDate\": \"2026-09-21\",\n  \"referenceNumber\": \"NEFT123456\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Properties",
+      "item": [
+        { "name": "List", "request": { "method": "GET", "url": "{{baseUrl}}/properties?type=VILLA&status=AVAILABLE" } },
+        { "name": "Projects", "request": { "method": "GET", "url": "{{baseUrl}}/properties/projects" } },
+        {
+          "name": "Create Property",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/properties",
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Sky Residences - 1601\",\n  \"propertyType\": \"FLAT\",\n  \"unitNumber\": \"1601\",\n  \"location\": \"Hinjewadi\",\n  \"city\": \"Pune\",\n  \"areaSqft\": 1650,\n  \"price\": 13500000,\n  \"bedrooms\": 3,\n  \"bathrooms\": 3,\n  \"status\": \"AVAILABLE\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        { "name": "List", "request": { "method": "GET", "url": "{{baseUrl}}/customers?q=9812" } },
+        {
+          "name": "Create Customer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/customers",
+            "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"Ramesh Kumar\",\n  \"mobile\": \"9812345678\",\n  \"email\": \"ramesh@example.com\",\n  \"city\": \"Pune\",\n  \"idProofType\": \"PAN\",\n  \"idProofNumber\": \"ABCDE1234F\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        { "name": "My Tasks", "request": { "method": "GET", "url": "{{baseUrl}}/tasks/mine?status=OPEN" } },
+        {
+          "name": "Create Task",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/tasks",
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Call back Ramesh Kumar\",\n  \"description\": \"Confirm weekend site visit\",\n  \"type\": \"CALLBACK\",\n  \"leadId\": {{leadId}},\n  \"dueAt\": \"2026-09-11T05:30:00Z\",\n  \"reminderAt\": \"2026-09-11T04:30:00Z\",\n  \"priority\": \"HIGH\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        { "name": "List", "request": { "method": "GET", "url": "{{baseUrl}}/notifications?unreadOnly=true" } },
+        { "name": "Unread Count", "request": { "method": "GET", "url": "{{baseUrl}}/notifications/unread-count" } },
+        { "name": "Mark All Read", "request": { "method": "POST", "url": "{{baseUrl}}/notifications/read-all" } }
+      ]
+    },
+    {
+      "name": "Users & Teams (ADMIN)",
+      "item": [
+        { "name": "List Users", "request": { "method": "GET", "url": "{{baseUrl}}/users?role=CALLING_TEAM&active=true" } },
+        { "name": "Users by Role", "request": { "method": "GET", "url": "{{baseUrl}}/users/by-role/SALES_EXECUTIVE" } },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/users",
+            "body": { "mode": "raw", "raw": "{\n  \"fullName\": \"New Caller\",\n  \"username\": \"caller3\",\n  \"email\": \"caller3@trishakti.com\",\n  \"password\": \"Password@123\",\n  \"phone\": \"9000000007\",\n  \"roles\": [\"CALLING_TEAM\"],\n  \"active\": true\n}" }
+          }
+        },
+        { "name": "List Teams", "request": { "method": "GET", "url": "{{baseUrl}}/teams" } }
+      ]
+    },
+    {
+      "name": "Audit Logs (ADMIN)",
+      "item": [
+        { "name": "Search", "request": { "method": "GET", "url": "{{baseUrl}}/audit-logs?entityType=Lead&page=0&size=30" } }
+      ]
+    },
+    {
+      "name": "Company / Metadata",
+      "item": [
+        { "name": "Company Info + Enums", "request": { "method": "GET", "url": "{{baseUrl}}/company" } }
+      ]
+    }
+  ]
+}

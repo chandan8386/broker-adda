@@ -1,0 +1,28 @@
+spring:
+  main:
+    web-application-type: servlet
+  datasource:
+    url: jdbc:h2:mem:trishakti;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: never
+
+app:
+  jwt:
+    secret: test-secret-key-for-junit-tests-please-32bytes-minimum
+    expiration-ms: 3600000
+    refresh-expiration-ms: 7200000
+  seed:
+    enabled: false
+
+server:
+  servlet:
+    context-path: ""

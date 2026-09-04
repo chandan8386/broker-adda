@@ -1,0 +1,37 @@
+# Java / Maven
+target/
+backend/data/
+!.mvn/wrapper/maven-wrapper.jar
+*.class
+*.jar
+*.war
+hs_err_pid*
+
+# Node / Web
+node_modules/
+dist/
+.vite/
+*.local
+.env.local
+.env.*.local
+
+# Flutter / Mobile
+mobile/.dart_tool/
+mobile/build/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/.packages
+*.iml
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Env / secrets
+.env
+
+# Logs
+*.log
+logs/

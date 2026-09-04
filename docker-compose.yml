@@ -1,0 +1,54 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: trishakti-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-trishakti_crm}
+      POSTGRES_USER: ${POSTGRES_USER:-trishakti}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-trishakti}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-trishakti} -d ${POSTGRES_DB:-trishakti_crm}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    container_name: trishakti-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-trishakti_crm}
+      DB_USER: ${POSTGRES_USER:-trishakti}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-trishakti}
+      JWT_SECRET: ${JWT_SECRET:-please-change-this-to-a-long-random-secret-at-least-32-bytes}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+      JWT_REFRESH_EXPIRATION_MS: ${JWT_REFRESH_EXPIRATION_MS:-604800000}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:8081}
+      SEED_ENABLED: "true"
+    ports:
+      - "8080:8080"
+
+  web:
+    build:
+      context: ./web
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8080/api}
+    container_name: trishakti-web
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  postgres-data:
