@@ -1,13 +1,9 @@
 # ---------- Build stage ----------
-FROM eclipse-temurin:25-jdk AS build
-
-ARG MAVEN_VERSION=3.9.9
-RUN apt-get update \
- && apt-get install -y --no-install-recommends curl ca-certificates \
- && curl -fsSL "https://dlcdn.apache.org/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz" \
-      | tar -xz -C /opt \
- && ln -s "/opt/apache-maven-${MAVEN_VERSION}/bin/mvn" /usr/local/bin/mvn \
- && rm -rf /var/lib/apt/lists/*
+# Official image that already bundles Maven + JDK 25. Do NOT go back to
+# downloading Maven from dlcdn.apache.org: that mirror only serves *current*
+# releases, so a pinned version 404s the moment it is superseded (which is
+# exactly how this build broke). Floating 3.9 tag, so it never ages out.
+FROM maven:3.9-eclipse-temurin-25 AS build
 
 WORKDIR /app
 COPY pom.xml .
