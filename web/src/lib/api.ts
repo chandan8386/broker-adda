@@ -34,7 +34,13 @@ export function configError(): string | null {
 
 if (typeof window !== 'undefined') {
   const problem = configError();
-  if (problem) console.error('[Trishakti CRM] ' + problem);
+  if (problem) {
+    console.error('[Trishakti CRM] ' + problem);
+  } else {
+    // Printed on every boot so which backend a deployment is talking to can be
+    // confirmed from the console, without digging through the bundle.
+    console.info('[Trishakti CRM] API base URL: ' + BASE_URL);
+  }
 }
 
 const TOKEN_KEY = 'stir_crm_access';
