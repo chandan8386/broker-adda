@@ -15,11 +15,15 @@ import com.trishakti.crm.mapper.CrmMappers;
 import com.trishakti.crm.repository.RoleRepository;
 import com.trishakti.crm.repository.TeamRepository;
 import com.trishakti.crm.repository.UserRepository;
+import com.trishakti.crm.security.SecurityUtils;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +36,9 @@ public class UserService {
     private final TeamRepository teamRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuditService auditService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public UserService(UserRepository userRepository, RoleRepository roleRepository,
                        TeamRepository teamRepository, PasswordEncoder passwordEncoder,
@@ -105,6 +112,63 @@ public class UserService {
         }
         user.setActive(active);
         auditService.record(active ? "USER_ACTIVATED" : "USER_DEACTIVATED", "User", id, null, null);
+    }
+
+    /**
+     * Work that would be orphaned by removing a user. A user is referenced by eleven tables, so a
+     * blind delete just fails on a foreign key; this reports what is in the way instead, and the
+     * caller is told to deactivate rather than delete.
+     */
+    private static final List<String[]> USER_REFERENCES = List.of(
+            new String[]{"Lead e where e.assignedUser.id = :id", "assigned lead"},
+            new String[]{"Lead e where e.createdByUser.id = :id", "created lead"},
+            new String[]{"LeadActivity e where e.actor.id = :id", "timeline entry"},
+            new String[]{"LeadAssignment e where e.toUser.id = :id or e.fromUser.id = :id or e.assignedBy.id = :id",
+                    "assignment record"},
+            new String[]{"CallLog e where e.caller.id = :id", "call log"},
+            new String[]{"FollowUp e where e.owner.id = :id", "follow-up"},
+            new String[]{"SiteVisit e where e.salesExecutive.id = :id", "site visit"},
+            new String[]{"Booking e where e.salesExecutive.id = :id", "booking"},
+            new String[]{"Task e where e.assignee.id = :id", "task"},
+            new String[]{"Team e where e.manager.id = :id", "team managed"},
+            new String[]{"User e where e.manager.id = :id", "direct report"});
+
+    @Transactional
+    public void delete(Long id) {
+        User user = find(id);
+
+        if (id.equals(SecurityUtils.currentUserId())) {
+            throw new BusinessRuleException("You cannot delete your own account");
+        }
+        boolean isAdmin = user.getRoles().stream().anyMatch(r -> r.getName() == RoleName.ADMIN);
+        if (isAdmin && userRepository.findActiveByRole(RoleName.ADMIN).size() <= 1) {
+            throw new BusinessRuleException("Cannot delete the last administrator");
+        }
+
+        List<String> blocking = new ArrayList<>();
+        for (String[] ref : USER_REFERENCES) {
+            long n = entityManager
+                    .createQuery("select count(e) from " + ref[0], Long.class)
+                    .setParameter("id", id)
+                    .getSingleResult();
+            if (n > 0) blocking.add(n + " " + ref[1] + (n == 1 ? "" : "s"));
+        }
+        if (!blocking.isEmpty()) {
+            throw new BusinessRuleException(
+                    user.getFullName() + " still has " + String.join(", ", blocking)
+                            + ". Deactivate the account instead so this history is preserved.");
+        }
+
+        // Rows owned outright by the user and meaningless without them.
+        entityManager.createQuery("delete from Notification n where n.recipient.id = :id")
+                .setParameter("id", id).executeUpdate();
+        entityManager.createQuery("delete from RefreshToken t where t.user.id = :id")
+                .setParameter("id", id).executeUpdate();
+
+        UserResponse before = CrmMappers.user(user);
+        user.getRoles().clear();          // clears the user_role join rows
+        userRepository.delete(user);
+        auditService.record("USER_DELETED", "User", id, before, null);
     }
 
     @Transactional

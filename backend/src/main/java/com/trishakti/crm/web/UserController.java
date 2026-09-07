@@ -70,6 +70,14 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Permanently delete a user. Refused (422) if they still have CRM history — "
+            + "deactivate instead so leads, calls and site visits keep their owner.")
+    @ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        userService.delete(id);
+    }
+
     @PostMapping("/{id}/reset-password")
     public ResponseEntity<Void> resetPassword(@PathVariable Long id, @RequestBody Map<String, String> body) {
         userService.resetPassword(id, body.get("newPassword"));

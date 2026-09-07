@@ -27,6 +27,23 @@ export default function Users() {
     onError: (e) => alert(apiErrorMessage(e)),
   });
 
+  const remove = useMutation({
+    mutationFn: async (id: number) => api.delete(`/users/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['users-list'] }),
+    // The API refuses deletion when a user still owns leads, calls or site visits and
+    // explains what is blocking it. Surface that verbatim rather than a generic failure.
+    onError: (e) => alert(apiErrorMessage(e)),
+  });
+
+  const confirmDelete = (u: UserRow) => {
+    const ok = window.confirm(
+      `Permanently delete ${u.fullName} (${u.username})?\n\n` +
+        'This cannot be undone. If they already own leads, calls or site visits the ' +
+        'deletion will be refused — deactivate them instead so that history is kept.',
+    );
+    if (ok) remove.mutate(u.id);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -43,7 +60,8 @@ export default function Users() {
             <thead>
               <tr>
                 <th className="th">Name</th><th className="th">Username</th><th className="th">Email</th>
-                <th className="th">Team</th><th className="th">Roles</th><th className="th">Active</th><th className="th"></th>
+                <th className="th">Team</th><th className="th">Roles</th><th className="th">Active</th>
+                <th className="th text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -57,10 +75,23 @@ export default function Users() {
                     <div className="flex flex-wrap gap-1">{u.roles.map((r) => <Badge key={r} value={r} />)}</div>
                   </td>
                   <td className="td">{u.active ? '✅' : '⛔'}</td>
-                  <td className="td text-right">
-                    <button className="btn-ghost px-3 py-1 text-xs" onClick={() => toggle.mutate({ id: u.id, active: u.active })}>
-                      {u.active ? 'Deactivate' : 'Activate'}
-                    </button>
+                  <td className="td">
+                    <div className="flex justify-end gap-2">
+                      <button
+                        className="btn-ghost px-3 py-1 text-xs"
+                        disabled={toggle.isPending}
+                        onClick={() => toggle.mutate({ id: u.id, active: u.active })}
+                      >
+                        {u.active ? 'Deactivate' : 'Activate'}
+                      </button>
+                      <button
+                        className="btn px-3 py-1 text-xs bg-rose-50 text-rose-700 hover:bg-rose-100"
+                        disabled={remove.isPending}
+                        onClick={() => confirmDelete(u)}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
