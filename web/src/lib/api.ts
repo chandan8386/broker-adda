@@ -10,13 +10,24 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
  * the visitor's own machine over http:// from an https:// page, which the browser
  * blocks as mixed content and reports as an opaque "CORS error" - see configError().
  */
+/**
+ * Deployed default, in source on purpose. Neither a committed .env file nor a
+ * dashboard variable proved dependable on Vercel: .env.production did not reach
+ * Vite's build, and an env var that exists but is empty silently outranks a
+ * .env file. A literal cannot be stripped or blanked, so a fresh clone deploys
+ * and works with no configuration at all.
+ *
+ * VITE_API_BASE_URL still wins whenever it is set to a non-empty value.
+ */
+const DEFAULT_API_URL = 'https://trishakti-crm-api.onrender.com/api';
+
 const CONFIGURED = (import.meta.env.VITE_API_BASE_URL ?? '').trim().replace(/\/$/, '');
 
 const ON_LOCALHOST =
   typeof window !== 'undefined' &&
   /^(localhost|127\.0\.0\.1|\[::1\])$/.test(window.location.hostname);
 
-const BASE_URL = CONFIGURED || (ON_LOCALHOST ? 'http://localhost:8080/api' : '');
+const BASE_URL = CONFIGURED || (ON_LOCALHOST ? 'http://localhost:8080/api' : DEFAULT_API_URL);
 
 /** A setup problem we can describe precisely, or null if the config looks sane. */
 export function configError(): string | null {
