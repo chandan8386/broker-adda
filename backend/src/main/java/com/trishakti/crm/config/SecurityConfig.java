@@ -78,7 +78,13 @@ public class SecurityConfig {
 
         // Entries containing '*' (e.g. https://*.vercel.app for preview deploys) are
         // treated as patterns; exact origins go through setAllowedOrigins.
-        List<String> exact = new ArrayList<>();
+        // Keep local web development usable even when a deployed environment sets
+        // CORS_ALLOWED_ORIGINS to its production website only. The browser's
+        // localhost origin is separate from the Render API origin.
+        List<String> exact = new ArrayList<>(List.of(
+                "http://localhost:5173",
+                "http://127.0.0.1:5173"
+        ));
         List<String> patterns = new ArrayList<>();
         for (String origin : allowedOrigins.split(",")) {
             String trimmed = origin.trim();
