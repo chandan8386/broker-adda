@@ -83,7 +83,8 @@ public class SecurityConfig {
         // localhost origin is separate from the Render API origin.
         List<String> exact = new ArrayList<>(List.of(
                 "http://localhost:5173",
-                "http://127.0.0.1:5173"
+                "http://127.0.0.1:5173",
+                "https://broker-adda.vercel.app"
         ));
         List<String> patterns = new ArrayList<>();
         for (String origin : allowedOrigins.split(",")) {
