@@ -89,7 +89,8 @@ This starts the API at `http://localhost:8080/api` and creates the demo accounts
 ```bash
 cd web
 npm install
-echo "VITE_API_BASE_URL=http://localhost:8080/api" > .env.local
+# Optional: point at a locally running backend instead of the shared hosted API.
+# echo "VITE_API_BASE_URL=http://localhost:8080/api" > .env.local
 npm run dev
 ```
 

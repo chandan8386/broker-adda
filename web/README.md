@@ -6,7 +6,7 @@ Professional CRM dashboard. Talks only to the REST API (`VITE_API_BASE_URL`).
 
 ```bash
 npm install
-cp .env.example .env.local          # point VITE_API_BASE_URL at the backend
+cp .env.example .env.local          # uses the shared hosted API; set localhost for a local backend
 npm run dev                         # http://localhost:5173
 ```
 
