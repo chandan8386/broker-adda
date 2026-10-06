@@ -34,8 +34,8 @@ The repo has a **Blueprint** at [`render.yaml`](../render.yaml) that provisions 
    - `trishakti-crm-db` — PostgreSQL (free)
    - `trishakti-crm-api` — Docker web service, built from `backend/Dockerfile`
 2. First build takes ~5–8 min (Maven downloads + compile + package inside Docker).
-3. When it goes **live**, note the URL, e.g. `https://trishakti-crm-api.onrender.com`.
-   - API base: `https://trishakti-crm-api.onrender.com/api`
+3. When it goes **live**, note the URL, e.g. `https://trishakti-crm-api-r9jf.onrender.com`.
+   - API base: `https://trishakti-crm-api-r9jf.onrender.com/api`
    - Swagger: `…/api/swagger-ui.html`
    - Health: `…/api/actuator/health`
 4. On first boot `SEED_ENABLED=true` seeds the demo users (password `Password@123`):
@@ -69,7 +69,7 @@ The repo has a **Blueprint** at [`render.yaml`](../render.yaml) that provisions 
 
    | Key | Value |
    |-----|-------|
-   | `VITE_API_BASE_URL` | `https://trishakti-crm-api.onrender.com/api` |
+   | `VITE_API_BASE_URL` | `https://trishakti-crm-api-r9jf.onrender.com/api` |
 
    (Include `/api`, no trailing slash. Vite inlines `VITE_*` at build time, so **redeploy** after changing it.)
 4. **Deploy.** You get `https://<project>.vercel.app`.
@@ -92,7 +92,7 @@ CORS_ALLOWED_ORIGINS = https://<project>.vercel.app,https://*-<your-team>.vercel
 Verify:
 
 ```bash
-curl -i -X OPTIONS https://trishakti-crm-api.onrender.com/api/auth/login \
+curl -i -X OPTIONS https://trishakti-crm-api-r9jf.onrender.com/api/auth/login \
   -H "Origin: https://<project>.vercel.app" \
   -H "Access-Control-Request-Method: POST"
 # expect: 200 + access-control-allow-origin echoing your origin

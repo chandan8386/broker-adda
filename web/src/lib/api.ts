@@ -19,7 +19,7 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
  *
  * VITE_API_BASE_URL still wins whenever it is set to a non-empty value.
  */
-const DEFAULT_API_URL = 'https://trishakti-crm-api.onrender.com/api';
+const DEFAULT_API_URL = 'https://trishakti-crm-api-r9jf.onrender.com/api';
 
 const CONFIGURED = (import.meta.env.VITE_API_BASE_URL ?? '').trim().replace(/\/$/, '');
 
