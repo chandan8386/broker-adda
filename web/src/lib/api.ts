@@ -76,7 +76,10 @@ export const tokenStore = {
 
 export const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 120_000,
+  // Render's free service can take around 50 seconds to wake. Keep enough room
+  // for a cold start, while still returning control to the login form if the
+  // service is stuck instead of leaving the button spinning indefinitely.
+  timeout: 90_000,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -142,6 +145,10 @@ export function apiErrorMessage(err: unknown): string {
   if (!e.response) {
     const problem = configError();
     if (problem) return problem;
+    if (e.code === 'ECONNABORTED' || e.code === 'ETIMEDOUT') {
+      return `The API at ${BASE_URL} did not respond within 90 seconds. It may be waking up; try again in a minute. ` +
+        'If this keeps happening, check that the Render API service is live.';
+    }
     return `Could not reach the API at ${BASE_URL}. It may be starting up (free hosting sleeps ` +
       'after inactivity and can take ~50s to wake), unreachable, or blocking this origin via CORS.';
   }
