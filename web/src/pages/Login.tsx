@@ -3,13 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { apiErrorMessage } from '../lib/api';
 
-const DEMO = [
-  ['Admin', 'admin@trishakti.com'],
-  ['Sales Manager', 'manager@trishakti.com'],
-  ['Calling Team', 'caller1@trishakti.com'],
-  ['Sales Executive', 'sales1@trishakti.com'],
-];
-
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -57,24 +50,6 @@ export default function Login() {
           <button className="btn-primary w-full" disabled={busy}>
             {busy ? 'Signing in…' : 'Sign in'}
           </button>
-          <div className="border-t border-slate-100 pt-3 text-xs text-slate-400">
-            <p className="mb-1 font-semibold">Demo accounts (password: Password@123)</p>
-            <div className="grid grid-cols-2 gap-1">
-              {DEMO.map(([role, email]) => (
-                <button
-                  key={email}
-                  type="button"
-                  className="rounded bg-slate-100 px-2 py-1 text-left hover:bg-slate-200"
-                  onClick={() => {
-                    setId(email);
-                    setPassword('Password@123');
-                  }}
-                >
-                  {role}
-                </button>
-              ))}
-            </div>
-          </div>
         </form>
       </div>
     </div>
