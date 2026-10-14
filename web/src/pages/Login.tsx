@@ -30,7 +30,7 @@ export default function Login() {
       <div
         aria-hidden="true"
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "linear-gradient(110deg, rgba(9, 31, 48, 0.78), rgba(9, 31, 48, 0.34)), url('/images/login-real-estate.jpg')" }}
+        style={{ backgroundImage: "linear-gradient(110deg, rgba(9, 31, 48, 0.78), rgba(9, 31, 48, 0.34)), url('/img/login-building-front.jpg')" }}
       />
       <div className="relative z-10 w-full max-w-md">
         <div className="mb-6 text-center text-white">
@@ -59,11 +59,11 @@ export default function Login() {
       </div>
       <a
         className="absolute bottom-3 right-4 z-10 text-xs text-white/80 underline decoration-white/50 underline-offset-2"
-        href="https://unsplash.com/photos/Mk0AIvIddhE"
+        href="https://unsplash.com/photos/an-apartment-building-with-a-walkway-leading-to-the-front-door-MNDn5jPOUNg"
         target="_blank"
         rel="noreferrer"
       >
-        Photo by aboodi vesakaran on Unsplash
+        Photo by Chelaxy Designs on Unsplash
       </a>
     </div>
   );
