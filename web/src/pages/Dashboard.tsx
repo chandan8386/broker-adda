@@ -16,7 +16,7 @@ import type { DashboardSummary } from '../lib/types';
 import { Spinner, StatCard } from '../components/ui';
 import { money, titleCase } from '../lib/format';
 
-const PIE_COLORS = ['#0f766e', '#2dd4bf', '#f59e0b', '#6366f1', '#ef4444', '#8b5cf6', '#10b981', '#0ea5e9'];
+const PIE_COLORS = ['#16294D', '#C9A227', '#1E3A66', '#E3C368', '#4B6387', '#A9840F', '#7388A8', '#D6AF45'];
 
 export default function Dashboard() {
   const { data, isLoading } = useQuery({
@@ -67,7 +67,7 @@ export default function Dashboard() {
               <XAxis dataKey="stage" fontSize={12} />
               <YAxis fontSize={12} allowDecimals={false} />
               <Tooltip />
-              <Bar dataKey="value" fill="#0f766e" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="value" fill="#16294D" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

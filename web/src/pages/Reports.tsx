@@ -28,8 +28,8 @@ export default function Reports() {
               <YAxis fontSize={12} allowDecimals={false} />
               <Tooltip />
               <Legend />
-              <Bar dataKey="totalLeads" name="Leads" fill="#0f766e" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="converted" name="Converted" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="totalLeads" name="Leads" fill="#16294D" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="converted" name="Converted" fill="#C9A227" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         )}

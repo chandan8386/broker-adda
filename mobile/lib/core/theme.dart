@@ -1,10 +1,22 @@
 import 'package:flutter/material.dart';
 
+const _brandNavy = Color(0xFF16294D);
+const _brandGold = Color(0xFFC9A227);
+
 final appTheme = ThemeData(
   useMaterial3: true,
-  colorSchemeSeed: const Color(0xFF0F766E),
+  colorScheme: ColorScheme.fromSeed(
+    seedColor: _brandNavy,
+    primary: _brandNavy,
+    secondary: _brandGold,
+  ),
   scaffoldBackgroundColor: const Color(0xFFF1F5F9),
-  appBarTheme: const AppBarTheme(centerTitle: false, elevation: 0),
+  appBarTheme: const AppBarTheme(
+    centerTitle: false,
+    elevation: 0,
+    foregroundColor: _brandNavy,
+    surfaceTintColor: Colors.transparent,
+  ),
   cardTheme: CardTheme(
     elevation: 0,
     shape: RoundedRectangleBorder(
@@ -12,7 +24,10 @@ final appTheme = ThemeData(
       side: const BorderSide(color: Color(0xFFE2E8F0)),
     ),
   ),
-  inputDecorationTheme: const InputDecorationTheme(border: OutlineInputBorder()),
+  inputDecorationTheme: const InputDecorationTheme(
+    border: OutlineInputBorder(),
+    focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: _brandGold, width: 2)),
+  ),
 );
 
 Color statusColor(String? s) {

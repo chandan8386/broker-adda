@@ -42,7 +42,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.apartment, size: 48, color: Color(0xFF0F766E)),
+                const Icon(Icons.apartment, size: 48, color: Color(0xFF16294D)),
                 const SizedBox(height: 12),
                 Text(AppConfig.companyName,
                     textAlign: TextAlign.center,

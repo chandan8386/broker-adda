@@ -33,11 +33,11 @@ export default function Login() {
         style={{ backgroundImage: "linear-gradient(110deg, rgba(9, 31, 48, 0.78), rgba(9, 31, 48, 0.34)), url('/img/login-building-front.jpg')" }}
       />
       <div className="relative z-10 w-full max-w-md">
-        <div className="mb-6 text-center text-white">
-          <h1 className="text-2xl font-bold">Shri Trishakti Infra Realtors Pvt Ltd</h1>
-          <p className="text-sm text-brand-100">Property Lead Management / CRM</p>
+        <div className="mb-6 rounded-2xl bg-white/95 px-8 py-4 text-center shadow-xl ring-1 ring-white/70 backdrop-blur-sm">
+          <img className="mx-auto block w-full max-w-[360px]" src="/img/trishakti-logo.svg" alt="Shri Trishakti Infra Realtors Pvt Ltd" />
+          <p className="mt-1 text-xs font-semibold tracking-wide text-brand-700">PROPERTY LEAD MANAGEMENT / CRM</p>
         </div>
-        <form onSubmit={submit} className="card space-y-4 p-6">
+        <form onSubmit={submit} className="card space-y-4 border-gold-200 p-6 shadow-2xl">
           <div>
             <label className="label">Username or Email</label>
             <input className="input" value={usernameOrEmail} onChange={(e) => setId(e.target.value)} autoFocus />
