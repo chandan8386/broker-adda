@@ -33,8 +33,8 @@ export default function Login() {
         style={{ backgroundImage: "linear-gradient(110deg, rgba(9, 31, 48, 0.78), rgba(9, 31, 48, 0.34)), url('/img/login-building-front.jpg')" }}
       />
       <div className="relative z-10 w-full max-w-md">
-        <div className="mb-6 rounded-2xl bg-white/95 px-8 py-4 text-center shadow-xl ring-1 ring-white/70 backdrop-blur-sm">
-          <img className="mx-auto block w-full max-w-[360px]" src="/img/trishakti-logo.svg" alt="Shri Trishakti Infra Realtors Pvt Ltd" />
+        <div className="mx-auto mb-6 w-fit max-w-full rounded-2xl bg-white/95 p-3 text-center shadow-xl ring-1 ring-white/70 backdrop-blur-sm">
+          <img className="mx-auto block w-full max-w-[280px]" src="/img/trishakti-logo.jpeg" alt="Shri Trishakti Infra Realtors Pvt Ltd" />
           <p className="mt-1 text-xs font-semibold tracking-wide text-brand-700">PROPERTY LEAD MANAGEMENT / CRM</p>
         </div>
         <form onSubmit={submit} className="card space-y-4 border-gold-200 p-6 shadow-2xl">
