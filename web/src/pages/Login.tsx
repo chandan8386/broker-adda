@@ -33,11 +33,9 @@ export default function Login() {
         style={{ backgroundImage: "linear-gradient(110deg, rgba(9, 31, 48, 0.78), rgba(9, 31, 48, 0.34)), url('/img/login-building-front.jpg')" }}
       />
       <div className="relative z-10 w-full max-w-md">
-        <div className="mx-auto mb-6 w-fit max-w-full rounded-2xl bg-white/95 p-3 text-center shadow-xl ring-1 ring-white/70 backdrop-blur-sm">
-          <img className="mx-auto block w-full max-w-[280px]" src="/img/trishakti-logo-transparent.png" alt="Shri Trishakti Infra Realtors Pvt Ltd" />
-          <p className="mt-1 text-xs font-semibold tracking-wide text-brand-700">PROPERTY LEAD MANAGEMENT / CRM</p>
-        </div>
-        <form onSubmit={submit} className="card space-y-4 border-gold-200 p-6 shadow-2xl">
+        <div className="card border-gold-200 p-6 shadow-2xl">
+          <img className="mx-auto mb-5 block w-full max-w-[280px]" src="/img/trishakti-logo-transparent.png" alt="Shri Trishakti Infra Realtors Pvt Ltd" />
+          <form onSubmit={submit} className="space-y-4">
           <div>
             <label className="label">Username or Email</label>
             <input className="input" value={usernameOrEmail} onChange={(e) => setId(e.target.value)} autoFocus />
@@ -55,16 +53,10 @@ export default function Login() {
           <button className="btn-primary w-full" disabled={busy}>
             {busy ? 'Signing in…' : 'Sign in'}
           </button>
-        </form>
+          </form>
+        </div>
       </div>
-      <a
-        className="absolute bottom-3 right-4 z-10 text-xs text-white/80 underline decoration-white/50 underline-offset-2"
-        href="https://unsplash.com/photos/an-apartment-building-with-a-walkway-leading-to-the-front-door-MNDn5jPOUNg"
-        target="_blank"
-        rel="noreferrer"
-      >
-        Photo by Chelaxy Designs on Unsplash
-      </a>
+     
     </div>
   );
 }
