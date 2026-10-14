@@ -12,6 +12,15 @@ import Papa from 'papaparse';
 type CsvRow = Record<string, string>;
 type ImportStatus = { state: 'Uploading' | 'Processing' | 'Completed' | 'Failed'; received: number; imported: number; skipped: number; errors: string[] };
 const CSV_HEADERS = ['customerName', 'mobile', 'email', 'source', 'sourceChannel', 'propertyType', 'budgetMin', 'budgetMax', 'preferredLocation', 'priority', 'notes'];
+const CSV_HEADER_ALIASES: Record<string, string> = {
+  customername: 'customerName', name: 'customerName', customer: 'customerName', fullname: 'customerName',
+  mobile: 'mobile', phone: 'mobile', phonenumber: 'mobile', mobilenumber: 'mobile', contactnumber: 'mobile',
+  email: 'email', source: 'source', advertisement: 'source', sourcechannel: 'sourceChannel', channel: 'sourceChannel',
+  propertytype: 'propertyType', property: 'propertyType', budgetmin: 'budgetMin', 'budget min': 'budgetMin',
+  budgetmax: 'budgetMax', 'budget max': 'budgetMax', preferredlocation: 'preferredLocation', location: 'preferredLocation',
+  priority: 'priority', notes: 'notes',
+};
+const normalizeCsvHeader = (header: string) => header.replace(/^\uFEFF/, '').trim().toLowerCase().replace(/[^a-z0-9]/g, '');
 
 export default function Leads() {
   const qc = useQueryClient();
@@ -52,6 +61,7 @@ export default function Leads() {
     setImportStatus({ state: 'Uploading', received: 0, imported: 0, skipped: 0, errors: [] });
     let uploadId = '';
     let buffer: CsvRow[] = [];
+    let headerMapping = new Map<string, string | undefined>();
     let nextRowNumber = 2;
     let totals = { received: 0, imported: 0, skipped: 0, errors: [] as string[] };
     const send = async (rows: CsvRow[], firstRowNumber: number) => {
@@ -72,10 +82,20 @@ export default function Leads() {
               try {
                 if (!uploadId) {
                   const headers = result.meta.fields ?? [];
-                  if (!CSV_HEADERS.every((header) => headers.includes(header))) throw new Error(`CSV must contain headers: ${CSV_HEADERS.join(', ')}`);
-                  uploadId = (await api.post('/leads/imports', { fileName: file.name, headers })).data.uploadId;
+                  headerMapping = new Map(headers.map((header) => [normalizeCsvHeader(header), CSV_HEADER_ALIASES[normalizeCsvHeader(header)]]));
+                  if (![...headerMapping.values()].includes('customerName') || ![...headerMapping.values()].includes('mobile')) {
+                    throw new Error('CSV must include customerName (or Name) and mobile (or Phone) columns.');
+                  }
+                  uploadId = (await api.post('/leads/imports', { fileName: file.name, headers: CSV_HEADERS })).data.uploadId;
                 }
-                buffer.push(...result.data);
+                buffer.push(...result.data.map((row) => {
+                  const normalized: CsvRow = {};
+                  for (const [header, value] of Object.entries(row)) {
+                    const key = headerMapping.get(normalizeCsvHeader(header));
+                    if (key) normalized[key] = value;
+                  }
+                  return normalized;
+                }));
                 while (buffer.length >= 500) {
                   const rows = buffer.splice(0, 500);
                   await send(rows, nextRowNumber);
@@ -126,7 +146,9 @@ export default function Leads() {
       </div>
 
       {importStatus && <div className="card flex items-center justify-between gap-3 p-3 text-sm">
-        <span><strong>{importStatus.state}</strong> · {importStatus.received} rows received · {importStatus.imported} imported · {importStatus.skipped} skipped</span>
+        <div className="min-w-0"><strong>{importStatus.state}</strong> · {importStatus.received} rows received · {importStatus.imported} imported · {importStatus.skipped} skipped
+          {importStatus.errors.length > 0 && <ul className="mt-2 max-h-40 overflow-auto text-xs text-red-700">{importStatus.errors.map((message, index) => <li key={`${index}-${message}`}>{message}</li>)}</ul>}
+        </div>
         {!importing && <button className="btn-ghost" onClick={() => setImportStatus(null)}>Dismiss</button>}
       </div>}
 

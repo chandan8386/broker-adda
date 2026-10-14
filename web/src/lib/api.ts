@@ -132,6 +132,7 @@ api.interceptors.response.use(
 );
 
 export function apiErrorMessage(err: unknown): string {
+  if (err instanceof Error && !(err as AxiosError).isAxiosError) return err.message;
   const e = err as AxiosError<{ message?: string; fieldErrors?: { field: string; message: string }[] }>;
   const data = e.response?.data;
   if (data?.fieldErrors?.length) {
