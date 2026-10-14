@@ -32,9 +32,9 @@ export default function Login() {
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: "linear-gradient(110deg, rgba(9, 31, 48, 0.78), rgba(9, 31, 48, 0.34)), url('/img/login-building-front.jpg')" }}
       />
-      <div className="relative z-10 w-full max-w-md">
-        <div className="card border-gold-200 p-6 shadow-2xl">
-          <img className="mx-auto mb-5 block w-full max-w-[280px]" src="/img/trishakti-logo-transparent.png" alt="Shri Trishakti Infra Realtors Pvt Ltd" />
+      <div className="relative z-10 w-full max-w-sm">
+        <div className="card border-gold-200 p-4 shadow-2xl">
+          <img className="mx-auto mb-2 block w-full max-w-[280px]" src="/img/trishakti-logo-transparent-crop.png" alt="Shri Trishakti Infra Realtors Pvt Ltd" />
           <form onSubmit={submit} className="space-y-4">
           <div>
             <label className="label">Username or Email</label>
