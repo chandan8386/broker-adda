@@ -34,7 +34,7 @@ export default function Login() {
       />
       <div className="relative z-10 w-full max-w-md">
         <div className="mx-auto mb-6 w-fit max-w-full rounded-2xl bg-white/95 p-3 text-center shadow-xl ring-1 ring-white/70 backdrop-blur-sm">
-          <img className="mx-auto block w-full max-w-[280px]" src="/img/trishakti-logo.jpeg" alt="Shri Trishakti Infra Realtors Pvt Ltd" />
+          <img className="mx-auto block w-full max-w-[280px]" src="/img/trishakti-logo-transparent.png" alt="Shri Trishakti Infra Realtors Pvt Ltd" />
           <p className="mt-1 text-xs font-semibold tracking-wide text-brand-700">PROPERTY LEAD MANAGEMENT / CRM</p>
         </div>
         <form onSubmit={submit} className="card space-y-4 border-gold-200 p-6 shadow-2xl">
