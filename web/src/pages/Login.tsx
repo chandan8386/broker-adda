@@ -26,8 +26,13 @@ export default function Login() {
   }
 
   return (
-    <div className="grid min-h-full place-items-center bg-gradient-to-br from-brand-800 to-brand-600 p-4">
-      <div className="w-full max-w-md">
+    <div className="relative grid min-h-screen place-items-center overflow-hidden p-4">
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "linear-gradient(110deg, rgba(9, 31, 48, 0.78), rgba(9, 31, 48, 0.34)), url('/images/login-real-estate.jpg')" }}
+      />
+      <div className="relative z-10 w-full max-w-md">
         <div className="mb-6 text-center text-white">
           <h1 className="text-2xl font-bold">Shri Trishakti Infra Realtors Pvt Ltd</h1>
           <p className="text-sm text-brand-100">Property Lead Management / CRM</p>
@@ -52,6 +57,14 @@ export default function Login() {
           </button>
         </form>
       </div>
+      <a
+        className="absolute bottom-3 right-4 z-10 text-xs text-white/80 underline decoration-white/50 underline-offset-2"
+        href="https://unsplash.com/photos/Mk0AIvIddhE"
+        target="_blank"
+        rel="noreferrer"
+      >
+        Photo by aboodi vesakaran on Unsplash
+      </a>
     </div>
   );
 }
