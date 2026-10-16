@@ -51,7 +51,7 @@ export default function Login() {
           </div>
           {error && <p className="rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
           <button className="btn-primary w-full" disabled={busy}>
-            {busy ? 'Signing in…' : 'Sign in'}
+            {busy ? 'Connecting to server…' : 'Sign in'}
           </button>
           </form>
         </div>

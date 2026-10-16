@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { isAxiosError } from 'axios';
 import { api, tokenStore } from '../lib/api';
 import type { AuthResponse, Role, UserSummary } from '../lib/types';
 
@@ -29,9 +30,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function login(usernameOrEmail: string, password: string) {
-    const res = await api.post<AuthResponse>('/auth/login', { usernameOrEmail, password });
-    tokenStore.set(res.data.accessToken, res.data.refreshToken);
-    setUser(res.data.user);
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await api.post<AuthResponse>('/auth/login', { usernameOrEmail, password });
+        tokenStore.set(res.data.accessToken, res.data.refreshToken);
+        setUser(res.data.user);
+        return;
+      } catch (err) {
+        const transient = isAxiosError(err) && (!err.response || err.response.status >= 500);
+        if (!transient || attempt === 1) throw err;
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      }
+    }
   }
 
   function logout() {
